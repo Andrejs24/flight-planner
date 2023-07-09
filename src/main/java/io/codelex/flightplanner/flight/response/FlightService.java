@@ -14,13 +14,23 @@ public class FlightService {
     }
 
     public synchronized void saveFlight(CreateFlightRequest request) {
-        long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
-        Flight flight = new Flight(request.getArrival(), request.getDestination(), lastUsedId + 1, request.getArrivalDateAndTime(), request.getDepartureDateAndTime());
-        flightRepository.saveFlights(flight);
+
     }
 
     public ListFlightResponse listFlights(){
         return new ListFlightResponse(flightRepository.showSavedFlights());
     }
+
+    public Flight addFlight(CreateFlightRequest request){
+        long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
+        Flight flight = new Flight(lastUsedId + 1,request.getFrom(), request.getTo(), request.getCarrier(),request.getArrivalTime(),request.getDepartureTime());
+        flightRepository.saveFlights(flight);
+        return flight;
+    }
+
+    public void clear(){
+       flightRepository.clearFlights();
+    }
+
 }
 
