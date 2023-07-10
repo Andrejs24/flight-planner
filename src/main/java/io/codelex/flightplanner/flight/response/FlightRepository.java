@@ -5,6 +5,7 @@ import io.codelex.flightplanner.flight.domain.Flight;
 import org.springframework.stereotype.Repository;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +26,9 @@ public class FlightRepository {
         savedFlights.clear();
     }
 
-    public boolean isFlightExists(Airport from, Airport to) {
+    public boolean isFlightExists(Airport from, Airport to, String carrier, LocalDateTime arrivalTime, LocalDateTime departureTime) {
         return showSavedFlights().stream()
-                .anyMatch(flight -> flight.getFrom().equals(from) && flight.getTo().equals(to));
+                .anyMatch(flight -> flight.getFrom().equals(from) && flight.getTo().equals(to) && flight.getCarrier().equals(carrier) && flight.getArrivalTime().equals(arrivalTime) && flight.getDepartureTime().equals(departureTime));
     }
 
 }

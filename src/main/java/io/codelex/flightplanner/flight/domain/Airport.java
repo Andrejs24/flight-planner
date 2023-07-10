@@ -1,11 +1,15 @@
 package io.codelex.flightplanner.flight.domain;
 
+import org.springframework.lang.NonNull;
+
 import java.util.Objects;
 
 public class Airport {
-
+    @NonNull
     private String country;
+    @NonNull
     private String city;
+    @NonNull
     private String airport;
 
     public Airport(String country, String city, String airport) {

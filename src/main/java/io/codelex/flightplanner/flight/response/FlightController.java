@@ -30,6 +30,9 @@ public class FlightController {
         } catch (DuplicateFlightException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
+        catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
 
 //        try {
