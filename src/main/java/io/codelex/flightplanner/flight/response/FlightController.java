@@ -1,6 +1,7 @@
 package io.codelex.flightplanner.flight.response;
 
 import io.codelex.flightplanner.flight.domain.Flight;
+import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,33 @@ public class FlightController {
 
     @PutMapping("/admin-api/flights")
     public ResponseEntity<Flight> addFlight(@RequestBody CreateFlightRequest request) {
-        logger.info("Flight was created successfully!" + request.getFrom() + " to " + request.getTo());
-        Flight addedFlight = flightService.addFlight(request);
-     return   ResponseEntity.status(HttpStatus.CREATED).body(addedFlight);
+
+        try {
+            Flight addedFlight = flightService.createFlight(request);
+            logger.info("Flight created successfully: " + addedFlight.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(addedFlight);
+        } catch (DuplicateFlightException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+
+//        try {
+//        logger.info("Flight creation request - " + request.getFrom() + " to " + request.getTo());
+//       if(flightService.isFlightExists(request)){
+//           return ResponseEntity.status(HttpStatus.CONFLICT).build();
+//        }
+//       Flight addedFlight = flightService.createFlight(request);
+//        logger.info("Flight created successfully: " + addedFlight.getId());
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(addedFlight);
+//        } catch (DuplicateFlightException e) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+//
+//    } catch (Exception e) {
+//
+//        logger.error("Error occurred while adding the flight", e);
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//    }
 
     }
 
@@ -39,9 +64,5 @@ public class FlightController {
     }
 }
 
-//    @PutMapping("flights")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public void addFlight
-//}
 
 

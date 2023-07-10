@@ -1,6 +1,7 @@
 package io.codelex.flightplanner.flight.response;
 
 import io.codelex.flightplanner.flight.domain.Flight;
+import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +22,20 @@ public class FlightService {
         return new ListFlightResponse(flightRepository.showSavedFlights());
     }
 
-    public Flight addFlight(CreateFlightRequest request){
-        long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
-        Flight flight = new Flight(lastUsedId + 1,request.getFrom(), request.getTo(), request.getCarrier(),request.getArrivalTime(),request.getDepartureTime());
-        flightRepository.saveFlights(flight);
-        return flight;
+    public boolean isFlightExists(CreateFlightRequest request) {
+      return  flightRepository.isFlightExists(request.getFrom(), request.getTo()) ? true : false;
     }
 
+    public Flight createFlight(CreateFlightRequest request) {
+        if (!isFlightExists(request)) {
+            long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
+            Flight flight = new Flight(lastUsedId + 1, request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
+            flightRepository.saveFlights(flight);
+            return flight;
+        } else {
+            throw new DuplicateFlightException("Flight already exists from " + request.getFrom() + " to " + request.getTo());
+        }
+    }
     public void clear(){
        flightRepository.clearFlights();
     }

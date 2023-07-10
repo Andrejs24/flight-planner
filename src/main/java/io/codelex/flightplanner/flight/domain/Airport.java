@@ -1,10 +1,12 @@
 package io.codelex.flightplanner.flight.domain;
 
+import java.util.Objects;
+
 public class Airport {
 
-private String country;
-private String city;
-private String airport;
+    private String country;
+    private String city;
+    private String airport;
 
     public Airport(String country, String city, String airport) {
         this.country = country;
@@ -37,5 +39,27 @@ private String airport;
 
     public void setAirport(String airport) {
         this.airport = airport;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Airport airport1)) return false;
+        return Objects.equals(country, airport1.country) && Objects.equals(city, airport1.city) && Objects.equals(airport, airport1.airport);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, city, airport);
+    }
+
+    @Override
+    public String toString() {
+        return "Airport{" +
+                "country='" + country + '\'' +
+                ", city='" + city + '\'' +
+                ", airport='" + airport + '\'' +
+                '}';
     }
 }

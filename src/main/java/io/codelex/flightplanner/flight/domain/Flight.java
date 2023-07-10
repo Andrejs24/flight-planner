@@ -3,6 +3,7 @@ package io.codelex.flightplanner.flight.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Flight {
     private long id;
@@ -73,7 +74,29 @@ public class Flight {
         this.carrier = carrier;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Flight flight)) return false;
+        return id == flight.id && Objects.equals(from, flight.from) && Objects.equals(to, flight.to) && Objects.equals(carrier, flight.carrier) && Objects.equals(arrivalTime, flight.arrivalTime) && Objects.equals(departureTime, flight.departureTime);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, from, to, carrier, arrivalTime, departureTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Flight{" +
+                "id=" + id +
+                ", from=" + from +
+                ", to=" + to +
+                ", carrier='" + carrier + '\'' +
+                ", arrivalTime=" + arrivalTime +
+                ", departureTime=" + departureTime +
+                '}';
+    }
 }
 
 

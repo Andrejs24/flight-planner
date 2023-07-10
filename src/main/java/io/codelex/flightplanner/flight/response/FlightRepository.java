@@ -1,5 +1,6 @@
 package io.codelex.flightplanner.flight.response;
 
+import io.codelex.flightplanner.flight.domain.Airport;
 import io.codelex.flightplanner.flight.domain.Flight;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,11 @@ public class FlightRepository {
 
     public void clearFlights() {
         savedFlights.clear();
+    }
+
+    public boolean isFlightExists(Airport from, Airport to) {
+        return showSavedFlights().stream()
+                .anyMatch(flight -> flight.getFrom().equals(from) && flight.getTo().equals(to));
     }
 
 }
