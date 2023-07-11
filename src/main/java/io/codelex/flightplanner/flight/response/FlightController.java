@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DateTimeException;
+
 @RestController
 public class FlightController {
 
@@ -31,6 +33,9 @@ public class FlightController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        catch (DateTimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 

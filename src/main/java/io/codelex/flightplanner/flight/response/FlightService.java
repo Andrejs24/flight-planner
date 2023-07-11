@@ -5,6 +5,8 @@ import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.DateTimeException;
+
 @Service
 public class FlightService {
 
@@ -32,6 +34,9 @@ public class FlightService {
         }
         if(!tripIsPossible(request)){
             throw new NullPointerException("Can`t fly to the same airport");
+        }
+        if (!dateIsCorrect(request)) {
+            throw new DateTimeException("Dates are incorrect");
         }
         if (!isFlightExists(request)) {
             long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
@@ -66,6 +71,10 @@ public class FlightService {
 
     public boolean tripIsPossible(CreateFlightRequest request){
         return ((request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim()))?false:true;
+    }
+
+    public boolean dateIsCorrect(CreateFlightRequest request){
+        return (request.getDepartureTime().isAfter(request.getArrivalTime()) || request.getDepartureTime().equals(request.getArrivalTime())) ?false:true;
     }
 
 }
