@@ -30,6 +30,9 @@ public class FlightService {
         if (!valuesNotBlank(request)) {
             throw new NullPointerException("Should not be blank parameter");
         }
+        if(!tripIsPossible(request)){
+            throw new NullPointerException("Can`t fly to the same airport");
+        }
         if (!isFlightExists(request)) {
             long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
             Flight flight = new Flight(lastUsedId + 1, request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
@@ -59,6 +62,10 @@ public class FlightService {
                 ((request.getFrom()).getCountry() == null || request.getFrom().getCountry() == ""))
             return false;
         else return true;
+    }
+
+    public boolean tripIsPossible(CreateFlightRequest request){
+        return ((request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim()))?false:true;
     }
 
 }
