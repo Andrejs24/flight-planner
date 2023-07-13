@@ -1,11 +1,20 @@
 package io.codelex.flightplanner.flight.response;
 
+import io.codelex.flightplanner.flight.domain.Airport;
 import io.codelex.flightplanner.flight.domain.Flight;
+import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
+import io.codelex.flightplanner.flight.request.SearchFlightRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class FlightService {
@@ -32,7 +41,7 @@ public class FlightService {
         if (!valuesNotBlank(request)) {
             throw new NullPointerException("Should not be blank parameter");
         }
-        if(!tripIsPossible(request)){
+        if (!tripIsPossible(request)) {
             throw new NullPointerException("Can`t fly to the same airport");
         }
         if (!dateIsCorrect(request)) {
@@ -69,12 +78,51 @@ public class FlightService {
         else return true;
     }
 
-    public boolean tripIsPossible(CreateFlightRequest request){
-        return ((request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim()))?false:true;
+    public boolean tripIsPossible(CreateFlightRequest request) {
+        return ((request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim())) ? false : true;
     }
 
-    public boolean dateIsCorrect(CreateFlightRequest request){
-        return (request.getDepartureTime().isAfter(request.getArrivalTime()) || request.getDepartureTime().equals(request.getArrivalTime())) ?false:true;
+    public boolean dateIsCorrect(CreateFlightRequest request) {
+        return (request.getDepartureTime().isAfter(request.getArrivalTime()) || request.getDepartureTime().equals(request.getArrivalTime())) ? false : true;
+    }
+
+    public Flight searchFlightById(long id) {
+        Flight flightFounded = flightRepository.showSavedFlights().stream().filter(flight -> flight.getId() == id).findFirst().orElse(null);
+        if (flightFounded.equals(null)) {
+            throw new NullPointerException("No such flight founded!");
+        } else return flightFounded;
+    }
+
+    public void deleteFlightById(long id) {
+        flightRepository.deleteFlight(id);
+    }
+
+    public List<Airport> searchAirportsByPhrase(String phrase) {
+        return flightRepository.showSavedFlights().stream()
+                .flatMap(flight -> Stream.of(flight.getFrom(), flight.getTo()))
+                .filter(airport -> airport.getAirport().toLowerCase().trim().startsWith(phrase.toLowerCase().trim())
+                        || airport.getCity().toLowerCase().trim().startsWith(phrase.toLowerCase().trim())
+                        || airport.getCountry().toLowerCase().trim().startsWith(phrase.toLowerCase().trim()))
+                .toList();
+    }
+
+
+    public synchronized PageResult<Flight> searchFlights(SearchFlightRequest request) {
+        if (request.getFrom() == null || request.getTo() == null || request.getDepartureDate() == null) {
+            throw new IllegalArgumentException("Some of values are null!");
+        }
+        if (request.getFrom().equals(request.getTo())) {
+            throw new IllegalArgumentException("Can`t be same airports!");
+        }
+
+        List<Flight> flights = flightRepository.showSavedFlights().stream()
+                .filter(flight -> flight.getFrom().getAirport().equals(request.getFrom()))
+                .filter(flight -> flight.getTo().getAirport().equals(request.getTo()))
+                .filter(flight -> flight.getDepartureTime().format(DateTimeFormatter.ofPattern("YYYY-MM-DD"))
+                        .equals(request.getDepartureDate()))
+                .toList();
+
+        return new PageResult<>(0, flights.size(), flights);
     }
 
 }

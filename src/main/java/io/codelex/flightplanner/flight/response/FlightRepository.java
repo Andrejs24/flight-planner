@@ -30,5 +30,12 @@ public class FlightRepository {
         return showSavedFlights().stream()
                 .anyMatch(flight -> flight.getFrom().equals(from) && flight.getTo().equals(to) && flight.getCarrier().equals(carrier) && flight.getArrivalTime().equals(arrivalTime) && flight.getDepartureTime().equals(departureTime));
     }
+    public void deleteFlight(long id){
+        savedFlights.stream()
+                .filter(flight -> flight.getId() == id)
+                .findFirst()
+                .ifPresent(flight -> savedFlights.remove(flight));
+
+    }
 
 }
