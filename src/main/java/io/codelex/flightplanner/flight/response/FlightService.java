@@ -118,7 +118,7 @@ public class FlightService {
         List<Flight> flights = flightRepository.showSavedFlights().stream()
                 .filter(flight -> flight.getFrom().getAirport().equals(request.getFrom()))
                 .filter(flight -> flight.getTo().getAirport().equals(request.getTo()))
-                .filter(flight -> flight.getDepartureTime().format(DateTimeFormatter.ofPattern("YYYY-MM-DD"))
+                .filter(flight -> flight.getDepartureTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         .equals(request.getDepartureDate()))
                 .toList();
 

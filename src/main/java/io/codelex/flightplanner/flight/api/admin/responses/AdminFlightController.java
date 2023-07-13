@@ -1,11 +1,10 @@
-package io.codelex.flightplanner.flight.response;
+package io.codelex.flightplanner.flight.api.admin.responses;
 
-import io.codelex.flightplanner.flight.domain.Airport;
+
 import io.codelex.flightplanner.flight.domain.Flight;
-import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
-import io.codelex.flightplanner.flight.request.SearchFlightRequest;
+import io.codelex.flightplanner.flight.response.FlightService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,21 +12,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DateTimeException;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @RestController
-public class FlightController {
+@RequestMapping("/admin-api")
+public class AdminFlightController {
 
     private final FlightService flightService;
 
-    public FlightController(FlightService flightService) {
+    public AdminFlightController(FlightService flightService) {
         this.flightService = flightService;
     }
 
-    Logger logger = LoggerFactory.getLogger(FlightController.class);
+    Logger logger = LoggerFactory.getLogger(AdminFlightController.class);
 
-    @PutMapping("/admin-api/flights")
+
+    @PutMapping("/flights")
     public ResponseEntity<Flight> addFlight(@RequestBody CreateFlightRequest request) {
 
         try {
@@ -46,7 +46,7 @@ public class FlightController {
 
     }
 
-    @DeleteMapping("admin-api/flights/{id}")
+    @DeleteMapping("flights/{id}")
     public ResponseEntity<Flight> deleteFlightById(@PathVariable long id) {
         try {
             flightService.deleteFlightById(id);
@@ -59,7 +59,7 @@ public class FlightController {
 
     }
 
-    @GetMapping("admin-api/flights/{id}")
+    @GetMapping("flights/{id}")
     public ResponseEntity<Flight> searchFlightById(@PathVariable long id) {
         try {
             Flight flightFounded = flightService.searchFlightById(id);
@@ -71,44 +71,4 @@ public class FlightController {
     }
 
 
-    @PostMapping("/testing-api/clear")
-    @ResponseStatus(HttpStatus.OK)
-    public void clear() {
-        flightService.clear();
-    }
-
-    @GetMapping("/api/airports")
-    public ResponseEntity<List<Airport>> searchAirports(@RequestParam("search") String search) {
-        List<Airport> matchingAirports = flightService.searchAirportsByPhrase(search);
-        return ResponseEntity.ok(matchingAirports);
-    }
-
-    @PostMapping("/api/flights/search")
-    public ResponseEntity<PageResult<Flight>> searchFlights(@RequestBody SearchFlightRequest request) {
-        try {
-            PageResult<Flight> flightsFounded = flightService.searchFlights(request);
-            logger.info("Reached this step");
-            return ResponseEntity.status(HttpStatus.OK).body(flightsFounded);
-        } catch (IllegalArgumentException e) {
-            logger.info("Bad request!");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-
-    @GetMapping("/api/flights/{id}")
-    public ResponseEntity<Flight> findFlyById(@PathVariable long id) {
-        try {
-            Flight flightFounded = flightService.searchFlightById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(flightFounded);
-        } catch (Exception e) {
-            logger.info("No such flight registered");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-        }
-    }
 }
-
-
-
-
