@@ -6,14 +6,12 @@ import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import io.codelex.flightplanner.flight.request.SearchFlightRequest;
-import org.springframework.lang.NonNull;
+
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service

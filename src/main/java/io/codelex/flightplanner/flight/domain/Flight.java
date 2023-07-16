@@ -26,6 +26,9 @@ public class Flight {
         this.departureTime = departureTime;
     }
 
+    public Flight() {
+    }
+
     public Airport getFrom() {
         return from;
     }
