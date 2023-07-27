@@ -2,22 +2,29 @@ package io.codelex.flightplanner.flight.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.codelex.flightplanner.flight.domain.Airport;
-import org.springframework.lang.NonNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 
 public class CreateFlightRequest {
-    @NonNull
+    @NotNull
+    @Valid
     private Airport from;
-    @NonNull
+    @NotNull
+    @Valid
     private Airport to;
-    @NonNull
+    @NotNull
+    @NotEmpty
+    @NotBlank
     private String carrier;
-    @NonNull
+    @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime arrivalTime;
-    @NonNull
+    @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime departureTime;
 
