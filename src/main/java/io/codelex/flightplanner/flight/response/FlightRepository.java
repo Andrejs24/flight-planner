@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public class FlightRepository {
 
-    private List<Flight> savedFlights = new ArrayList<>();
+    private final List<Flight> savedFlights = new ArrayList<>();
 
     public void saveFlights(Flight flight) {
         this.savedFlights.add(flight);
