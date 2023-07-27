@@ -5,11 +5,10 @@ import io.codelex.flightplanner.flight.domain.Flight;
 import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.request.SearchFlightRequest;
 import io.codelex.flightplanner.flight.response.FlightService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,38 +22,30 @@ public class CustomerFlightController {
         this.flightService = flightService;
     }
 
-    Logger logger = LoggerFactory.getLogger(CustomerFlightController.class);
-
     @GetMapping("/airports")
-    public ResponseEntity<List<Airport>> searchAirports(@RequestParam("search") String search) {
-        List<Airport> matchingAirports = flightService.searchAirportsByPhrase(search);
-        return ResponseEntity.ok(matchingAirports);
+    @ResponseStatus(HttpStatus.OK)
+    public List<Airport> searchAirports(@RequestParam("search") String search) {
+        return flightService.searchAirportsByPhrase(search);
     }
 
     @PostMapping("/flights/search")
-    public ResponseEntity<PageResult<Flight>> searchFlights(@RequestBody SearchFlightRequest request) {
+    @ResponseStatus(HttpStatus.OK)
+    public PageResult<Flight> searchFlights(@Valid @RequestBody SearchFlightRequest request) {
         try {
-            PageResult<Flight> flightsFounded = flightService.searchFlights(request);
-            logger.info("Reached this step");
-            return ResponseEntity.status(HttpStatus.OK).body(flightsFounded);
+            return flightService.searchFlights(request);
         } catch (IllegalArgumentException e) {
-            logger.info("Bad request!");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request!", e);
         }
     }
 
 
-    @GetMapping("/flights/{id}")
-    public ResponseEntity<Flight> findFlyById(@PathVariable long id) {
-        try {
-            Flight flightFounded = flightService.searchFlightById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(flightFounded);
-        } catch (Exception e) {
-            logger.info("No such flight registered");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
+    @GetMapping("flights/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flight searchFlightById(@PathVariable long id) {
+        Flight foundFlight = flightService.searchFlightById(id);
+        if (foundFlight == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight registered");
         }
+        return foundFlight;
     }
-
-
 }
