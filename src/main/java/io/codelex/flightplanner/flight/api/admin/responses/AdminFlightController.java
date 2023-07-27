@@ -2,13 +2,12 @@ package io.codelex.flightplanner.flight.api.admin.responses;
 
 
 import io.codelex.flightplanner.flight.domain.Flight;
-import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import io.codelex.flightplanner.flight.response.FlightService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import java.time.DateTimeException;
 
 
 @RestController
@@ -24,18 +23,8 @@ public class AdminFlightController {
 
     @PutMapping("/flights")
     @ResponseStatus(HttpStatus.CREATED)
-    public Flight addFlight(@RequestBody CreateFlightRequest request) {
-
-        try {
-            return flightService.createFlight(request);
-        } catch (DuplicateFlightException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flight already exists", e);
-        } catch (NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This is a problem", e);
-        } catch (DateTimeException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format", e);
-        }
-
+    public Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
+        return flightService.createFlight(request);
     }
 
     @DeleteMapping("flights/{id}")
@@ -51,14 +40,12 @@ public class AdminFlightController {
 
     @GetMapping("flights/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Flight searchFlightById(@PathVariable long id) {
-        try {
-            return flightService.searchFlightById(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight registered", e);
-
+    public Flight searchFlightById(@Valid @PathVariable long id) {
+        Flight foundFlight = flightService.searchFlightById(id);
+        if (foundFlight == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight registered");
         }
+        return foundFlight;
     }
-
 
 }
