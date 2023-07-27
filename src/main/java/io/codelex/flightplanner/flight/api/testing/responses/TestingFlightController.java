@@ -2,8 +2,6 @@ package io.codelex.flightplanner.flight.api.testing.responses;
 
 
 import io.codelex.flightplanner.flight.response.FlightService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +17,6 @@ public class TestingFlightController {
     public TestingFlightController(FlightService flightService) {
         this.flightService = flightService;
     }
-
-    Logger logger = LoggerFactory.getLogger(TestingFlightController.class);
 
 
     @PostMapping("/clear")

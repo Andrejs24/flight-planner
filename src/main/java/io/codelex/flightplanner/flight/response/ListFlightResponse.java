@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ListFlightResponse {
 
-    List<Flight> flights;
+  private   List<Flight> flights;
 
     public ListFlightResponse(List<Flight> flights) {
         this.flights = flights;
