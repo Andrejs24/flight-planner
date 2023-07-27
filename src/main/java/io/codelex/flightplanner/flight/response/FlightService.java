@@ -3,57 +3,47 @@ package io.codelex.flightplanner.flight.response;
 import io.codelex.flightplanner.flight.domain.Airport;
 import io.codelex.flightplanner.flight.domain.Flight;
 import io.codelex.flightplanner.flight.domain.PageResult;
-import io.codelex.flightplanner.flight.exeptions.DuplicateFlightException;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import io.codelex.flightplanner.flight.request.SearchFlightRequest;
-import org.springframework.lang.NonNull;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.time.DateTimeException;
+import org.springframework.web.server.ResponseStatusException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 public class FlightService {
 
-    private FlightRepository flightRepository;
+    private final FlightRepository flightRepository;
 
     public FlightService(FlightRepository flightRepository) {
         this.flightRepository = flightRepository;
     }
-
-    public synchronized void saveFlight(CreateFlightRequest request) {
-
-    }
-
     public ListFlightResponse listFlights() {
         return new ListFlightResponse(flightRepository.showSavedFlights());
     }
 
+
     public boolean isFlightExists(CreateFlightRequest request) {
-        return flightRepository.isFlightExists(request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime()) ? true : false;
+        return flightRepository.isFlightExists(request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
     }
 
-    public synchronized Flight createFlight(CreateFlightRequest request) {
-        if (!valuesNotBlank(request)) {
-            throw new NullPointerException("Should not be blank parameter");
-        }
+    public synchronized Flight createFlight(@Valid CreateFlightRequest request) {
+//
         if (!tripIsPossible(request)) {
-            throw new NullPointerException("Can`t fly to the same airport");
-        }
+           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This is a problem");        }
         if (!dateIsCorrect(request)) {
-            throw new DateTimeException("Dates are incorrect");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is not appropriated ");
         }
         if (!isFlightExists(request)) {
-            long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(c -> c.getId()).max().orElse(0);
+            long lastUsedId = flightRepository.showSavedFlights().stream().mapToLong(Flight::getId).max().orElse(0);
             Flight flight = new Flight(lastUsedId + 1, request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
             flightRepository.saveFlights(flight);
             return flight;
         } else {
-            throw new DuplicateFlightException("Flight already exists from " + request.getFrom() + " to " + request.getTo());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flight already exists from " + request.getFrom() + " to " + request.getTo());
         }
     }
 
@@ -62,35 +52,25 @@ public class FlightService {
         flightRepository.clearFlights();
     }
 
-    public boolean valuesNotBlank(CreateFlightRequest request) {
-        if (request.getTo() == null ||
-                request.getFrom() == null ||
-                (request.getCarrier() == null || request.getCarrier() == "") ||
-                request.getArrivalTime() == null ||
-                request.getDepartureTime() == null ||
-                ((request.getTo()).getAirport() == null || request.getTo().getAirport() == "") ||
-                ((request.getTo()).getCity() == null || request.getTo().getCity() == "") ||
-                ((request.getTo()).getCountry() == null || request.getTo().getCountry() == "") ||
-                ((request.getFrom()).getAirport() == null || request.getFrom().getAirport() == "") ||
-                ((request.getFrom()).getCity() == null || request.getFrom().getCity() == "") ||
-                ((request.getFrom()).getCountry() == null || request.getFrom().getCountry() == ""))
-            return false;
-        else return true;
-    }
 
     public boolean tripIsPossible(CreateFlightRequest request) {
-        return ((request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim())) ? false : true;
+        return !(request.getFrom()).getAirport().toLowerCase().trim().equals((request.getTo()).getAirport().toLowerCase().trim());
     }
 
     public boolean dateIsCorrect(CreateFlightRequest request) {
-        return (request.getDepartureTime().isAfter(request.getArrivalTime()) || request.getDepartureTime().equals(request.getArrivalTime())) ? false : true;
+        return !request.getDepartureTime().isAfter(request.getArrivalTime()) && !request.getDepartureTime().equals(request.getArrivalTime());
     }
 
     public Flight searchFlightById(long id) {
-        Flight flightFounded = flightRepository.showSavedFlights().stream().filter(flight -> flight.getId() == id).findFirst().orElse(null);
-        if (flightFounded.equals(null)) {
-            throw new NullPointerException("No such flight founded!");
-        } else return flightFounded;
+
+        System.out.println("Saved Flights: " + flightRepository.showSavedFlights());
+
+        Flight foundFlight = flightRepository.showSavedFlights().stream()
+                .filter(flight -> flight.getId() == id)
+                .findFirst()
+                .orElse(null);
+        System.out.println("Found Flight: " + foundFlight);
+        return foundFlight;
     }
 
     public void deleteFlightById(long id) {
@@ -107,10 +87,7 @@ public class FlightService {
     }
 
 
-    public synchronized PageResult<Flight> searchFlights(SearchFlightRequest request) {
-        if (request.getFrom() == null || request.getTo() == null || request.getDepartureDate() == null) {
-            throw new IllegalArgumentException("Some of values are null!");
-        }
+    public synchronized PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
         if (request.getFrom().equals(request.getTo())) {
             throw new IllegalArgumentException("Can`t be same airports!");
         }
