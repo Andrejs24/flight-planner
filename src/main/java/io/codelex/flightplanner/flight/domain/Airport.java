@@ -1,15 +1,25 @@
 package io.codelex.flightplanner.flight.domain;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
 public class Airport {
-    @NonNull
+
+    @NotNull
+    @NotEmpty
+    @NotBlank
     private String country;
-    @NonNull
+    @NotNull
+    @NotEmpty
+    @NotBlank
     private String city;
-    @NonNull
+    @NotNull
+    @NotEmpty
+    @NotBlank
     private String airport;
 
     public Airport(String country, String city, String airport) {
