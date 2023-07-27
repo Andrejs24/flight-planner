@@ -8,8 +8,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class FlightPlannerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(FlightPlannerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FlightPlannerApplication.class, args);
+    }
 
 }
