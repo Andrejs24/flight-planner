@@ -3,7 +3,6 @@ package io.codelex.flightplanner.flight.domain;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
