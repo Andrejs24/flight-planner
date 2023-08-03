@@ -63,7 +63,7 @@ public class FlightDataBaseService implements FlightService {
 
     @Override
     public void clear() {
-
+        flightDataBaseRepository.deleteAll();
     }
 
     @Override
@@ -84,11 +84,11 @@ public class FlightDataBaseService implements FlightService {
 
     @Override
     public void deleteFlightById(long id) {
-
+        flightDataBaseRepository.deleteById(id);
     }
 
     @Override
-    public PageResult<Flight> searchFlights(SearchFlightRequest request) {
+    public PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
         return null;
     }
 

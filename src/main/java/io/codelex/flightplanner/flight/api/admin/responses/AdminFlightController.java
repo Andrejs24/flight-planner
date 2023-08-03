@@ -4,6 +4,7 @@ package io.codelex.flightplanner.flight.api.admin.responses;
 import io.codelex.flightplanner.flight.domain.Flight;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import io.codelex.flightplanner.flight.response.FlightService;
+import io.codelex.flightplanner.flight.response.ListFlightResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,13 @@ public class AdminFlightController {
     public Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
         return flightService.createFlight(request);
     }
+
+    @GetMapping("/flights")
+    @ResponseStatus(HttpStatus.OK)
+    public ListFlightResponse showAllFlights() {
+        return flightService.listFlights();
+    }
+
 
     @DeleteMapping("/flights/{id}")
     @ResponseStatus(HttpStatus.OK)
