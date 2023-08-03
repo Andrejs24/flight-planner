@@ -7,19 +7,20 @@ import io.codelex.flightplanner.flight.request.CreateFlightRequest;
 import io.codelex.flightplanner.flight.request.SearchFlightRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-@Service
+
 public class FlightDataBaseService implements FlightService {
 
 
     private final FlightDataBaseRepository flightDataBaseRepository;
+    private final AirportDataBaseRepository airportDataBaseRepository;
 
-    public FlightDataBaseService(FlightDataBaseRepository flightDataBaseRepository) {
+    public FlightDataBaseService(FlightDataBaseRepository flightDataBaseRepository, AirportDataBaseRepository airportDataBaseRepository) {
         this.flightDataBaseRepository = flightDataBaseRepository;
+        this.airportDataBaseRepository = airportDataBaseRepository;
     }
 
     @Override
@@ -29,6 +30,14 @@ public class FlightDataBaseService implements FlightService {
 
     @Override
     public boolean isFlightExists(CreateFlightRequest request) {
+        String fromCountry = request.getFrom().getCountry();
+        String fromCity = request.getFrom().getCity();
+        String fromAirport = request.getFrom().getAirport();
+        String toCountry = request.getTo().getCountry();
+        String toCity = request.getTo().getCity();
+        String toAirport = request.getTo().getAirport();
+        String carrier = request.getCarrier();
+        flightDataBaseRepository.isFlightExist(fromCountry, fromCity, fromAirport, toCountry, toCity, toAirport, carrier);
         return false;
     }
 
@@ -41,16 +50,16 @@ public class FlightDataBaseService implements FlightService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is not appropriated ");
         }
         if (!isFlightExists(request)) {
-            long lastUsedId = flightInMemoryRepository.showSavedFlights().stream().mapToLong(Flight::getId).max().orElse(0);
-            Flight flight = new Flight(lastUsedId + 1, request.getFrom(), request.getTo(), request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
-            flightInMemoryRepository.saveFlights(flight);
+            Airport airportFrom = airportDataBaseRepository.findByAirport(request.getFrom().getAirport());
+            Airport airportTo = airportDataBaseRepository.findByAirport(request.getTo().getAirport());
+            Flight flight = new Flight(airportFrom, airportTo, request.getCarrier(), request.getArrivalTime(), request.getDepartureTime());
+            flightDataBaseRepository.save(flight);
             return flight;
         } else {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Flight already exists from " + request.getFrom() + " to " + request.getTo());
         }
     }
-        return null;
-}
+
 
     @Override
     public void clear() {
