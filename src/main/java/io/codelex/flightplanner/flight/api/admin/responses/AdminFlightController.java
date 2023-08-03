@@ -27,7 +27,7 @@ public class AdminFlightController {
         return flightService.createFlight(request);
     }
 
-    @DeleteMapping("flights/{id}")
+    @DeleteMapping("/flights/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFlightById(@PathVariable long id) {
         try {
