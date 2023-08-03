@@ -18,7 +18,7 @@ public class FlightConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "flight", name = "service.version", havingValue = "database")
-    public FlightService getDatabaseVersion(FlightDataBaseRepository flightDataBaseRepository) {
-        return new FlightDataBaseService(flightDataBaseRepository);
+    public FlightService getDatabaseVersion(FlightDataBaseRepository flightDataBaseRepository, AirportDataBaseRepository airportDataBaseRepository) {
+        return new FlightDataBaseService(flightDataBaseRepository, airportDataBaseRepository);
     }
 }
