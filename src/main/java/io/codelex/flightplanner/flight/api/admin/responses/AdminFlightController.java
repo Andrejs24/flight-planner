@@ -2,7 +2,9 @@ package io.codelex.flightplanner.flight.api.admin.responses;
 
 
 import io.codelex.flightplanner.flight.domain.Flight;
+import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
+import io.codelex.flightplanner.flight.request.SearchFlightRequest;
 import io.codelex.flightplanner.flight.response.FlightService;
 import io.codelex.flightplanner.flight.response.ListFlightResponse;
 import jakarta.validation.Valid;
@@ -54,6 +56,12 @@ public class AdminFlightController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight registered");
         }
         return foundFlight;
+    }
+
+    @GetMapping("flights/search")
+    @ResponseStatus(HttpStatus.OK)
+    public PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
+        return flightService.searchFlights(request);
     }
 
 }
