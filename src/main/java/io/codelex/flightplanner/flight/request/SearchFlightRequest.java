@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 
 public class SearchFlightRequest {
 
@@ -17,8 +19,8 @@ public class SearchFlightRequest {
     @NotEmpty
     private String to;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-DD")
-    private String departureDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime departureDate;
 
 
     public SearchFlightRequest() {
@@ -41,11 +43,11 @@ public class SearchFlightRequest {
         this.to = to;
     }
 
-    public String getDepartureDate() {
+    public LocalDateTime getDepartureDate() {
         return departureDate;
     }
 
-    public void setDepartureDate(String departureDate) {
+    public void setDepartureDate(LocalDateTime departureDate) {
         this.departureDate = departureDate;
     }
 }
