@@ -20,21 +20,28 @@ public interface FlightDataBaseRepository extends JpaRepository<Flight, Long> {
             "AND f.to.country = :toCountry " +
             "AND f.to.city = :toCity " +
             "AND f.to.airport = :toAirport " +
-            "AND f.carrier = :carrier")
+            "AND f.carrier = :carrier " +
+            "AND f.arrivalTime = :arrivalTime " +
+            "AND f.departureTime = :departureTime")
     boolean isFlightExist(@Param("fromCountry") String fromCountry,
                           @Param("fromCity") String fromCity,
                           @Param("fromAirport") String fromAirport,
                           @Param("toCountry") String toCountry,
                           @Param("toCity") String toCity,
                           @Param("toAirport") String toAirport,
-                          @Param("carrier") String carrier);
+                          @Param("carrier") String carrier,
+                          @Param("arrivalTime") LocalDateTime arrivalTime,
+                          @Param("departureTime") LocalDateTime departureTime);
 
-    @Query("select f FROM Flight f where f.from.city = :from " +
-            "and f.to.city = :to " +
-            "and f.departureTime = :departureDate")
-    List<Flight> searchFlights(@Param("from") String from,
-                               @Param("to") String to,
-                               @Param("departureDate") LocalDateTime departureDate);
+    @Query("SELECT f FROM Flight f " +
+            "JOIN f.from a " +
+            "JOIN f.to a2 " +
+            "WHERE a.airport = :fromAirportCode " +
+            "AND a2.airport = :toAirportCode " +
+            "AND f.departureTime = :departureTime")
+    List<Flight> searchFlights(@Param("fromAirportCode") String fromAirportCode,
+                               @Param("toAirportCode") String toAirportCode,
+                               @Param("departureTime") LocalDateTime departureTime);
 
 
 }
