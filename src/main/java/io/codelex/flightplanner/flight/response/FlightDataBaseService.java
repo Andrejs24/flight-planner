@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -23,13 +25,24 @@ public class FlightDataBaseService implements FlightService {
         this.airportDataBaseRepository = airportDataBaseRepository;
     }
 
+    private static LocalDateTime formatStringToLocalDateTime(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (dateString.length() == 10) {
+            dateString = dateString + " 00:00";
+        }
+
+        return LocalDateTime.parse(dateString, formatter);
+
+    }
+
+
     @Override
     public ListFlightResponse listFlights() {
         return new ListFlightResponse(flightDataBaseRepository.findAll());
     }
 
     @Override
-    public boolean isFlightExists(CreateFlightRequest request) {
+    public synchronized boolean isFlightExists(CreateFlightRequest request) {
         String fromCountry = request.getFrom().getCountry();
         String fromCity = request.getFrom().getCity();
         String fromAirport = request.getFrom().getAirport();
@@ -37,7 +50,9 @@ public class FlightDataBaseService implements FlightService {
         String toCity = request.getTo().getCity();
         String toAirport = request.getTo().getAirport();
         String carrier = request.getCarrier();
-        return flightDataBaseRepository.isFlightExist(fromCountry, fromCity, fromAirport, toCountry, toCity, toAirport, carrier);
+        LocalDateTime arrivalTime = request.getArrivalTime();
+        LocalDateTime departureTime = request.getDepartureTime();
+        return flightDataBaseRepository.isFlightExist(fromCountry, fromCity, fromAirport, toCountry, toCity, toAirport, carrier, arrivalTime, departureTime);
     }
 
     @Override
@@ -49,12 +64,12 @@ public class FlightDataBaseService implements FlightService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is not appropriated ");
         }
         if (!isFlightExists(request)) {
-            if (!airportDataBaseRepository.isAirportExist(request.getFrom().getCountry(), request.getFrom().getCity(), request.getFrom().getAirport())) {
+            if (!airportDataBaseRepository.isAirportExist(request.getFrom().getAirport())) {
                 Airport airport = new Airport(request.getFrom().getCountry(), request.getFrom().getCity(), request.getFrom().getAirport());
                 airportDataBaseRepository.save(airport);
             }
-            if (!airportDataBaseRepository.isAirportExist(request.getTo().getCountry(), request.getTo().getCity(), request.getTo().getAirport())) {
-                Airport airport = new Airport(request.getFrom().getCountry(), request.getFrom().getCity(), request.getFrom().getAirport());
+            if (!airportDataBaseRepository.isAirportExist(request.getTo().getAirport())) {
+                Airport airport = new Airport(request.getTo().getCountry(), request.getTo().getCity(), request.getTo().getAirport());
                 airportDataBaseRepository.save(airport);
             }
             Airport airportFrom = airportDataBaseRepository.findByAirport(request.getFrom().getAirport());
@@ -68,7 +83,6 @@ public class FlightDataBaseService implements FlightService {
         }
     }
 
-
     @Override
     public void clear() {
         flightDataBaseRepository.deleteAll();
@@ -81,7 +95,7 @@ public class FlightDataBaseService implements FlightService {
     }
 
     @Override
-    public boolean dateIsCorrect(CreateFlightRequest request) {
+    public synchronized boolean dateIsCorrect(CreateFlightRequest request) {
         return !request.getDepartureTime().isAfter(request.getArrivalTime()) && !request.getDepartureTime().equals(request.getArrivalTime());
     }
 
@@ -92,21 +106,27 @@ public class FlightDataBaseService implements FlightService {
 
     @Override
     public void deleteFlightById(long id) {
-        searchFlightById(id);
         flightDataBaseRepository.deleteById(id);
     }
 
     @Override
-    public PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
-        List<Flight> flightsList = flightDataBaseRepository.searchFlights(request.getFrom(), request.getTo(), request.getDepartureDate());
+    public synchronized PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
+        if (request.getFrom().equals(request.getTo())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't fly from same airport");
 
-        return new PageResult<>(1, flightsList.size(), flightsList);
+        } else {
+            List<Flight> flightsList = flightDataBaseRepository.searchFlights(request.getFrom(), request.getTo(), formatStringToLocalDateTime(request.getDepartureDate()));
+
+            return new PageResult<>(0, flightsList.size(), flightsList);
+
+        }
     }
 
     @Override
     public List<Airport> searchAirportsByPhrase(String phrase) {
-        return airportDataBaseRepository.searchAirportsByPhrase(phrase.toLowerCase());
+        return airportDataBaseRepository.searchAirportsByPhrase(phrase.toLowerCase().trim());
     }
+
 
 }
 
