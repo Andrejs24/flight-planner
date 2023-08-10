@@ -26,7 +26,7 @@ public class AdminFlightController {
 
     @PutMapping("/flights")
     @ResponseStatus(HttpStatus.CREATED)
-    public Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
+    public synchronized Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
         return flightService.createFlight(request);
     }
 
@@ -40,12 +40,7 @@ public class AdminFlightController {
     @DeleteMapping("/flights/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFlightById(@PathVariable long id) {
-        try {
-            flightService.deleteFlightById(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such flight registered", e);
-        }
-
+        flightService.deleteFlightById(id);
     }
 
     @GetMapping("flights/{id}")

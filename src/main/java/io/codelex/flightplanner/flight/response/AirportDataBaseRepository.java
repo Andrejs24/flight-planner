@@ -15,12 +15,8 @@ public interface AirportDataBaseRepository extends JpaRepository<Airport, Long> 
     Airport findByAirport(String airport);
 
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Airport a " +
-            "WHERE a.airport = :airport " +
-            "AND a.city = :city " +
-            "AND a.country = :country ")
-    boolean isAirportExist(@Param("country") String country,
-                           @Param("city") String city,
-                           @Param("airport") String airport);
+            "WHERE a.airport = :airport ")
+    boolean isAirportExist(@Param("airport") String airport);
 
     @Query("SELECT a FROM Airport a " +
             "WHERE LOWER(a.airport) LIKE %:phrase% " +
