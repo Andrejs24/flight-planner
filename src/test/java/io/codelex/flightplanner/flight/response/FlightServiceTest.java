@@ -19,7 +19,7 @@ import java.util.List;
 class FlightServiceTest {
 
     @Mock
-    FlightRepository flightRepository;
+    FlightInMemoryRepository flightInMemoryRepository;
 
     @InjectMocks
     FlightService flightService;
@@ -42,7 +42,7 @@ class FlightServiceTest {
         List<Airport> expectedList = new ArrayList<>();
         expectedList.add(airport1);
         //When
-        Mockito.when(flightRepository.showSavedFlights()).thenReturn(actualList);
+        Mockito.when(flightInMemoryRepository.showSavedFlights()).thenReturn(actualList);
         flightService.searchAirportsByPhrase("RIX");
         //Then
         Assertions.assertEquals(expectedList, flightService.searchAirportsByPhrase("RIX"));

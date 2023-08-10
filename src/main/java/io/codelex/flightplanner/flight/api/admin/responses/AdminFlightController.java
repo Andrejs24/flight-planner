@@ -2,8 +2,11 @@ package io.codelex.flightplanner.flight.api.admin.responses;
 
 
 import io.codelex.flightplanner.flight.domain.Flight;
+import io.codelex.flightplanner.flight.domain.PageResult;
 import io.codelex.flightplanner.flight.request.CreateFlightRequest;
+import io.codelex.flightplanner.flight.request.SearchFlightRequest;
 import io.codelex.flightplanner.flight.response.FlightService;
+import io.codelex.flightplanner.flight.response.ListFlightResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,19 +26,21 @@ public class AdminFlightController {
 
     @PutMapping("/flights")
     @ResponseStatus(HttpStatus.CREATED)
-    public Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
+    public synchronized Flight addFlight(@Valid @RequestBody CreateFlightRequest request) {
         return flightService.createFlight(request);
     }
 
-    @DeleteMapping("flights/{id}")
+    @GetMapping("/flights")
+    @ResponseStatus(HttpStatus.OK)
+    public ListFlightResponse showAllFlights() {
+        return flightService.listFlights();
+    }
+
+
+    @DeleteMapping("/flights/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFlightById(@PathVariable long id) {
-        try {
-            flightService.deleteFlightById(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such flight registered", e);
-        }
-
+        flightService.deleteFlightById(id);
     }
 
     @GetMapping("flights/{id}")
@@ -46,6 +51,12 @@ public class AdminFlightController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight registered");
         }
         return foundFlight;
+    }
+
+    @GetMapping("flights/search")
+    @ResponseStatus(HttpStatus.OK)
+    public PageResult<Flight> searchFlights(@Valid SearchFlightRequest request) {
+        return flightService.searchFlights(request);
     }
 
 }
